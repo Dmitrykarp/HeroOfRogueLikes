@@ -1,11 +1,14 @@
 package map;
 
+import lombok.Getter;
+
 import java.util.ArrayList;
 import java.util.Random;
 
 public class GameMap {
     private final int width;
     private final int height;
+    @Getter
     private final char[][] map;
     private final Random random = new Random();
 
@@ -102,4 +105,5 @@ public class GameMap {
     public boolean isExit(int x, int y) {
         return map[y][x] == 'X';
     }
+
 }

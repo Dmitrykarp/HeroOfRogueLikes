@@ -19,7 +19,7 @@ public class MainGame {
     private static ArrayList<Enemy> enemies;
     private static ArrayList<Item> items;
 
-    private static Random random = new Random();
+    private static final Random random = new Random();
     private static boolean levelComplete;
 
     public static void main(String[] args) {
@@ -80,7 +80,7 @@ public class MainGame {
                 y = random.nextInt(HEIGHT);
             } while (gameMap.getTile(x, y) != '.');
 
-            enemies.add(new Enemy(x, y, 10));
+            enemies.add(new Enemy(x, y, 10, 2));
             gameMap.setTile(x, y, 'E');
         }
     }
@@ -94,7 +94,7 @@ public class MainGame {
                 y = random.nextInt(HEIGHT);
             } while (gameMap.getTile(x, y) != '.');
 
-            items.add(new Item(x, y));
+            items.add(new Item(x, y, "Potion"));
             gameMap.setTile(x, y, 'I');
         }
     }
