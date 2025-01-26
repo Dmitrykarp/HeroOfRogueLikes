@@ -11,7 +11,12 @@ public class RogueGame {
     private static int playerX = 0;
     private static int playerY = 0;
 
+    private static int playerHealth = 20;
+    private static int playerAttack = 5;
+
     private static int[][] enemies = new int[NUM_ENEMIES][2]; // Координаты врагов
+    private static int[] enemyHealth = new int[NUM_ENEMIES];  // Здоровье врагов
+
     private static int[][] items = new int[NUM_ITEMS][2];     // Координаты предметов
 
     private static Random random = new Random();
@@ -21,8 +26,9 @@ public class RogueGame {
         Scanner scanner = new Scanner(System.in);
 
         System.out.println("Добро пожаловать в рогалик!");
-        while (true) {
+        while (playerHealth > 0) {
             printMap();
+            System.out.println("Ваше здоровье: " + playerHealth);
             System.out.print("Введите команду (w/a/s/d для движения, q для выхода): ");
             String input = scanner.nextLine();
 
@@ -32,7 +38,12 @@ public class RogueGame {
             }
 
             processInput(input);
-            moveEnemies(); // Двигаем врагов
+            moveEnemies();
+
+            if (playerHealth <= 0) {
+                System.out.println("Вы погибли. Игра окончена.");
+                break;
+            }
         }
 
         scanner.close();
@@ -59,6 +70,7 @@ public class RogueGame {
 
             enemies[i][0] = x;
             enemies[i][1] = y;
+            enemyHealth[i] = 10; // Здоровье врага
             map[y][x] = 'E'; // Обозначение врага
         }
 
@@ -103,10 +115,13 @@ public class RogueGame {
             char target = map[newY][newX];
 
             if (target == 'E') {
-                System.out.println("Вы столкнулись с врагом! Сражение!");
-                // Здесь можно добавить логику боя
+                int enemyIndex = findEnemy(newX, newY);
+                if (enemyIndex != -1) {
+                    fightEnemy(enemyIndex);
+                }
             } else if (target == 'I') {
-                System.out.println("Вы подобрали предмет!");
+                System.out.println("Вы подобрали предмет! (+5 здоровья)");
+                playerHealth += 5; // Восстанавливаем здоровье
             }
 
             map[playerY][playerX] = '.'; // Очищаем старую позицию
@@ -122,8 +137,36 @@ public class RogueGame {
         return x >= 0 && x < WIDTH && y >= 0 && y < HEIGHT;
     }
 
+    private static void fightEnemy(int enemyIndex) {
+        System.out.println("Сражение с врагом!");
+        enemyHealth[enemyIndex] -= playerAttack;
+        System.out.println("Вы нанесли врагу " + playerAttack + " урона!");
+
+        if (enemyHealth[enemyIndex] <= 0) {
+            System.out.println("Враг побеждён!");
+            map[enemies[enemyIndex][1]][enemies[enemyIndex][0]] = '.';
+            enemies[enemyIndex][0] = -1; // Убираем врага с карты
+            enemies[enemyIndex][1] = -1;
+        } else {
+            int damage = random.nextInt(5) + 1; // Враг наносит урон
+            playerHealth -= damage;
+            System.out.println("Враг атакует вас! Вы потеряли " + damage + " здоровья.");
+        }
+    }
+
+    private static int findEnemy(int x, int y) {
+        for (int i = 0; i < NUM_ENEMIES; i++) {
+            if (enemies[i][0] == x && enemies[i][1] == y) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
     private static void moveEnemies() {
         for (int i = 0; i < NUM_ENEMIES; i++) {
+            if (enemyHealth[i] <= 0) continue; // Пропускаем мёртвых врагов
+
             int oldX = enemies[i][0];
             int oldY = enemies[i][1];
             int newX = oldX;
