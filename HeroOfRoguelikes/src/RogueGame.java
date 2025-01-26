@@ -22,7 +22,9 @@ public class RogueGame {
     private static Random random = new Random();
 
     public static void main(String[] args) {
-        initializeMap();
+        generateMapWithWalls();
+        placePlayer();
+        placeEnemiesAndItems();
         Scanner scanner = new Scanner(System.in);
 
         System.out.println("Добро пожаловать в рогалик!");
@@ -49,24 +51,34 @@ public class RogueGame {
         scanner.close();
     }
 
-    private static void initializeMap() {
-        // Заполняем карту
+    private static void generateMapWithWalls() {
         for (int y = 0; y < HEIGHT; y++) {
             for (int x = 0; x < WIDTH; x++) {
-                map[y][x] = '.'; // Пустое пространство
+                if (random.nextDouble() < 0.2) { // 20% клеток — стены
+                    map[y][x] = '#';
+                } else {
+                    map[y][x] = '.';
+                }
             }
         }
+    }
 
-        // Устанавливаем игрока
+    private static void placePlayer() {
+        do {
+            playerX = random.nextInt(WIDTH);
+            playerY = random.nextInt(HEIGHT);
+        } while (map[playerY][playerX] != '.'); // Ищем свободную клетку
         map[playerY][playerX] = '@';
+    }
 
-        // Создаём врагов
+    private static void placeEnemiesAndItems() {
+        // Размещение врагов
         for (int i = 0; i < NUM_ENEMIES; i++) {
             int x, y;
             do {
                 x = random.nextInt(WIDTH);
                 y = random.nextInt(HEIGHT);
-            } while (map[y][x] != '.'); // Ищем пустую клетку
+            } while (map[y][x] != '.'); // Ищем свободную клетку
 
             enemies[i][0] = x;
             enemies[i][1] = y;
@@ -74,13 +86,13 @@ public class RogueGame {
             map[y][x] = 'E'; // Обозначение врага
         }
 
-        // Создаём предметы
+        // Размещение предметов
         for (int i = 0; i < NUM_ITEMS; i++) {
             int x, y;
             do {
                 x = random.nextInt(WIDTH);
                 y = random.nextInt(HEIGHT);
-            } while (map[y][x] != '.'); // Ищем пустую клетку
+            } while (map[y][x] != '.'); // Ищем свободную клетку
 
             items[i][0] = x;
             items[i][1] = y;
@@ -134,7 +146,7 @@ public class RogueGame {
     }
 
     private static boolean isValidMove(int x, int y) {
-        return x >= 0 && x < WIDTH && y >= 0 && y < HEIGHT;
+        return x >= 0 && x < WIDTH && y >= 0 && y < HEIGHT && map[y][x] != '#';
     }
 
     private static void fightEnemy(int enemyIndex) {
